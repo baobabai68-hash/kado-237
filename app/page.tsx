@@ -1,112 +1,144 @@
-import Image from 'next/image';
+'use client';
+
+import { useState } from 'react';
 
 export default function Home() {
+  const [telephone, setTelephone] = useState('');
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ type: '', text: '' });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    // Vérification locale du numéro (9 chiffres, commence par 6)
+    const phoneRegex = /^6[5-9][0-9]{7}$/;
+    if (!phoneRegex.test(telephone)) {
+      setMessage({ type: 'error', text: 'Le numéro entré est invalide. Exemple: 677123456' });
+      return;
+    }
+
+    if (!acceptedTerms) {
+      setMessage({ type: 'error', text: 'Vous devez accepter les conditions pour participer.' });
+      return;
+    }
+
+    setLoading(true);
+    setMessage({ type: 'info', text: 'Vérification de votre session...' });
+
+    // Pour l'instant, on simule la connexion pour voir le visuel
+    setTimeout(() => {
+      setLoading(false);
+      setMessage({ type: 'success', text: 'Numéro validé ! Connexion au flux publicitaire...' });
+    }, 1500);
+  };
+
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
+    <main style={{
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#f3f4f6',
+      fontFamily: 'sans-serif',
+      padding: '20px'
+    }}>
+      <div style={{
+        backgroundColor: '#ffffff',
+        padding: '30px',
+        borderRadius: '16px',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        width: '100%',
+        maxWidth: '400px',
+        boxSizing: 'border-box'
+      }}>
+        {/* En-tête de la page */}
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <h1 style={{ color: '#1e3a8a', fontSize: '28px', margin: '0 0 8px 0', fontWeight: 'bold' }}>
+            🎉 KADO 237
+          </h1>
+          <p style={{ color: '#4b5563', fontSize: '14px', margin: '0' }}>
+            Entre ton numéro Mobile Money et tente de gagner de nombreux lots !
+          </p>
         </div>
-      </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px] z-[-1]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+        {/* Message d'alerte (Erreur ou Succès) */}
+        {message.text && (
+          <div style={{
+            backgroundColor: message.type === 'error' ? '#fee2e2' : message.type === 'success' ? '#dcfce7' : '#e0f2fe',
+            color: message.type === 'error' ? '#991b1b' : message.type === 'success' ? '#166534' : '#0369a1',
+            padding: '12px',
+            borderRadius: '8px',
+            marginBottom: '16px',
+            fontSize: '14px',
+            textAlign: 'center'
+          }}>
+            {message.text}
+          </div>
+        )}
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+        {/* Formulaire */}
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <label htmlFor="phone" style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '6px' }}>
+              Numéro de téléphone (MTN / Orange)
+            </label>
+            <input
+              id="phone"
+              type="tel"
+              placeholder="Ex: 699001122"
+              value={telephone}
+              onChange={(e) => setTelephone(e.target.value)}
+              disabled={loading}
+              style={{
+                width: '100%',
+                padding: '12px',
+                border: '1px solid #d1d5db',
+                borderRadius: '8px',
+                fontSize: '16px',
+                boxSizing: 'border-box',
+                outline: 'none'
+              }}
+              required
+            />
+          </div>
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+          {/* Case à cocher CGU */}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+            <input
+              id="terms"
+              type="checkbox"
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+              disabled={loading}
+              style={{ marginTop: '3px', cursor: 'pointer' }}
+            />
+            <label htmlFor="terms" style={{ fontSize: '13px', color: '#4b5563', lineHeight: '1.4', cursor: 'pointer' }}>
+              J'accepte le règlement du tirage au sort et j'autorise KADO 237 à collecter mon numéro pour la remise des lots.
+            </label>
+          </div>
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
+          {/* Bouton de validation */}
+          <button
+            type="submit"
+            disabled={loading}
+            style={{
+              width: '100%',
+              backgroundColor: loading ? '#9ca3af' : '#2563eb',
+              color: '#ffffff',
+              fontWeight: 'bold',
+              padding: '14px',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '16px',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              transition: 'background-color 0.2s'
+            }}
+          >
+            {loading ? 'Vérification en cours...' : '🚀 Participer au Tirage'}
+          </button>
+        </form>
       </div>
     </main>
   );
