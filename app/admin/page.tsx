@@ -15,6 +15,9 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
 
+  // État pour stocker la liste des numéros enregistrés
+  const [participations, setParticipations] = useState<any[]>([]);
+
   // Vérification de sécurité locale
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,6 +51,24 @@ export default function AdminDashboard() {
     loadSponsorData();
   }, [sponsorId, auth]);
 
+  // Charger la liste des numéros enregistrés (Participations)
+  const loadParticipations = async () => {
+    const { data, error } = await supabase
+      .from('participations')
+      .select('*')
+      .order('date_participation', { ascending: false });
+
+    if (data && !error) {
+      setParticipations(data);
+    }
+  };
+
+  useEffect(() => {
+    if (auth) {
+      loadParticipations();
+    }
+  }, [auth]);
+
   // Sauvegarder les modifications textuelles et couleurs
   const handleSaveData = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,11 +100,9 @@ export default function AdminDashboard() {
     setLoading(true);
     setStatusMessage(`Téléversement du ${fileType} en cours...`);
 
-    // Créer un nom unique pour le fichier (ex: sponsor_1_video.mp4)
     const fileExtension = file.name.split('.').pop();
     const fileName = `sponsor_${sponsorId}_${fileType}_${Date.now()}.${fileExtension}`;
 
-    // 1. Envoyer le fichier dans le bucket "medias" créé précédemment
     const { data: uploadData, error: uploadError } = await supabase.storage
       .from('medias')
       .upload(fileName, file, { cacheControl: '3600', upsert: true });
@@ -94,11 +113,9 @@ export default function AdminDashboard() {
       return;
     }
 
-    // 2. Récupérer l'URL publique du fichier envoyé
     const { data: linkData } = supabase.storage.from('medias').getPublicUrl(fileName);
     const publicUrl = linkData.publicUrl;
 
-    // 3. Enregistrer cette URL dans la table du sponsor
     const updatePayload = fileType === 'video' ? { video: publicUrl } : { logo_url: publicUrl };
     
     const { error: dbError } = await supabase
@@ -114,7 +131,6 @@ export default function AdminDashboard() {
     setLoading(false);
   };
 
-  // --- ÉCRAN DE CONNEXION ---
   if (!auth) {
     return (
       <main style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0f172a', fontFamily: 'sans-serif', padding: '20px' }}>
@@ -130,74 +146,101 @@ export default function AdminDashboard() {
     );
   }
 
-  // --- PANNEAU DE CONTRÔLE CMS ---
   return (
     <main style={{ minHeight: '100vh', backgroundColor: '#f1f5f9', padding: '20px', fontFamily: 'sans-serif' }}>
-      <div style={{ maxWidth: '700px', margin: '0 auto', backgroundColor: '#ffffff', padding: '30px', borderRadius: '16px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '30px' }}>
         
-        <header style={{ borderBottom: '2px solid #e2e8f0', paddingBottom: '16px', marginBottom: '24px' }}>
-          <h1 style={{ margin: '0', color: '#1e293b', fontSize: '24px' }}>🎛️ Panneau de Contrôle KADO 237</h1>
-          <p style={{ margin: '6px 0 0 0', color: '#64748b', fontSize: '14px' }}>Modifie le contenu de ton application à la volée, sans coder.</p>
-        </header>
+        {/* SECTION 1 : GESTION DES SPONSORS */}
+        <div style={{ backgroundColor: '#ffffff', padding: '30px', borderRadius: '16px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
+          <header style={{ borderBottom: '2px solid #e2e8f0', paddingBottom: '16px', marginBottom: '24px' }}>
+            <h1 style={{ margin: '0', color: '#1e293b', fontSize: '24px' }}>🎛️ Panneau de Contrôle KADO 237</h1>
+            <p style={{ margin: '6px 0 0 0', color: '#64748b', fontSize: '14px' }}>Modifie le contenu de ton application à la volée, sans coder.</p>
+          </header>
 
-        {statusMessage && (
-          <div style={{ padding: '12px', backgroundColor: '#e0f2fe', color: '#0369a1', borderRadius: '8px', marginBottom: '20px', fontWeight: 'bold', textAlign: 'center', fontSize: '14px' }}>
-            {statusMessage}
+          {statusMessage && (
+            <div style={{ padding: '12px', backgroundColor: '#e0f2fe', color: '#0369a1', borderRadius: '8px', marginBottom: '20px', fontWeight: 'bold', textAlign: 'center', fontSize: '14px' }}>
+              {statusMessage}
+            </div>
+          )}
+
+          <div style={{ marginBottom: '24px', backgroundColor: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
+            <label style={{ display: 'block', fontWeight: 'bold', color: '#334155', marginBottom: '8px' }}>Choisir le Sponsor à modifier :</label>
+            <select value={sponsorId} onChange={(e) => setSponsorId(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '16px', backgroundColor: '#fff' }}>
+              <option value="1">Sponsor Étape 1</option>
+              <option value="2">Sponsor Étape 2</option>
+              <option value="3">Sponsor Étape 3</option>
+              <option value="4">Sponsor Étape 4</option>
+              <option value="5">Sponsor Étape 5</option>
+            </select>
           </div>
-        )}
 
-        {/* 1. Sélection du sponsor */}
-        <div style={{ marginBottom: '24px', backgroundColor: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
-          <label style={{ display: 'block', fontWeight: 'bold', color: '#334155', marginBottom: '8px' }}>Choisir le Sponsor à modifier :</label>
-          <select value={sponsorId} onChange={(e) => setSponsorId(e.target.value)} style={{ width: '100%', padding: '12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '16px', backgroundColor: '#fff' }}>
-            <option value="1">Sponsor Étape 1</option>
-            <option value="2">Sponsor Étape 2</option>
-            <option value="3">Sponsor Étape 3</option>
-            <option value="4">Sponsor Étape 4</option>
-            <option value="5">Sponsor Étape 5</option>
-          </select>
+          <form onSubmit={handleSaveData} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <div>
+              <label style={{ display: 'block', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Nom de l'entreprise / Marque</label>
+              <input type="text" value={nomSponsor} onChange={(e) => setNomSponsor(e.target.value)} style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '6px', boxSizing: 'border-box' }} required placeholder="Ex: MTN Cameroun" />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Texte ou Message Publicitaire</label>
+              <textarea value={textePublicitaire} onChange={(e) => setTextePublicitaire(e.target.value)} rows={4} style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '6px', boxSizing: 'border-box' }} required placeholder="Écris l'annonce ici..." />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Couleur d'ambiance de la page</label>
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                <input type="color" value={couleurFond} onChange={(e) => setCouleurFond(e.target.value)} style={{ width: '50px', height: '40px', border: 'none', cursor: 'pointer' }} />
+                <span style={{ fontSize: '14px', color: '#64748b' }}>Couleur de fond pour ce sponsor</span>
+              </div>
+            </div>
+
+            <button type="submit" disabled={loading} style={{ padding: '14px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: loading ? 'not-allowed' : 'pointer' }}>
+              {loading ? 'Traitement...' : '💾 Sauvegarder les Textes & Couleurs'}
+            </button>
+          </form>
+
+          <hr style={{ margin: '30px 0', border: '0', borderTop: '1px solid #e2e8f0' }} />
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <h3 style={{ margin: '0', color: '#1e293b' }}>📁 Fichiers multimédias</h3>
+            <input type="file" accept="image/*" disabled={loading} onChange={(e) => handleFileUpload(e, 'logo')} />
+            <input type="file" accept="video/mp4" disabled={loading} onChange={(e) => handleFileUpload(e, 'video')} />
+          </div>
         </div>
 
-        {/* 2. Formulaire des Textes et Couleurs */}
-        <form onSubmit={handleSaveData} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div>
-            <label style={{ display: 'block', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Nom de l'entreprise / Marque</label>
-            <input type="text" value={nomSponsor} onChange={(e) => setNomSponsor(e.target.value)} style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '6px', boxSizing: 'border-box' }} required placeholder="Ex: MTN Cameroun" />
+        {/* SECTION 2 : VISUALISATION DES NUMÉROS REÇUS */}
+        <div style={{ backgroundColor: '#ffffff', padding: '30px', borderRadius: '16px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
+          <div style={{ display: 'flex', justifyContent: 'between', alignItems: 'center', marginBottom: '20px' }}>
+            <h2 style={{ margin: '0', color: '#1e293b', fontSize: '20px' }}>📈 Numéros enregistrés ({participations.length})</h2>
+            <button onClick={loadParticipations} style={{ padding: '8px 14px', backgroundColor: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold', fontSize: '13px' }}>🔄 Actualiser</button>
           </div>
 
-          <div>
-            <label style={{ display: 'block', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Texte ou Message Publicitaire</label>
-            <textarea value={textePublicitaire} onChange={(e) => setTextePublicitaire(e.target.value)} rows={4} style={{ width: '100%', padding: '10px', border: '1px solid #cbd5e1', borderRadius: '6px', boxSizing: 'border-box', fontFamily: 'sans-serif' }} required placeholder="Écris l'annonce ou l'offre promotionnelle ici..." />
-          </div>
-
-          <div>
-            <label style={{ display: 'block', fontWeight: '600', color: '#475569', marginBottom: '6px' }}>Couleur d'ambiance de la page</label>
-            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <input type="color" value={couleurFond} onChange={(e) => setCouleurFond(e.target.value)} style={{ width: '50px', height: '40px', border: 'none', padding: '0', cursor: 'pointer' }} />
-              <span style={{ fontSize: '14px', color: '#64748b' }}>Cette couleur habillera la page entière du sponsor</span>
-            </div>
-          </div>
-
-          <button type="submit" disabled={loading} style={{ padding: '14px', backgroundColor: '#10b981', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: loading ? 'not-allowed' : 'pointer', fontSize: '16px' }}>
-            {loading ? 'Traitement...' : '💾 Sauvegarder les Textes & Couleurs'}
-          </button>
-        </form>
-
-        <hr style={{ margin: '30px 0', border: '0', borderTop: '1px solid #e2e8f0' }} />
-
-        {/* 3. Section d'envoi des Fichiers Médias (Vidéos / Logos) */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <h3 style={{ margin: '0 0 4px 0', color: '#1e293b' }}>📁 Fichiers multimédias du sponsor</h3>
-          <p style={{ margin: '0 0 10px 0', fontSize: '13px', color: '#64748b' }}>Téléverse directement tes éléments. Ils remplaceront les anciens instantanément.</p>
-
-          <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
-            <label style={{ display: 'block', fontWeight: '600', color: '#475569', marginBottom: '6px', fontSize: '14px' }}>Changer le logo de la marque (.png, .jpg)</label>
-            <input type="file" accept="image/*" disabled={loading} onChange={(e) => handleFileUpload(e, 'logo')} style={{ fontSize: '14px' }} />
-          </div>
-
-          <div style={{ backgroundColor: '#f8fafc', padding: '16px', borderRadius: '8px', border: '1px dashed #cbd5e1' }}>
-            <label style={{ display: 'block', fontWeight: '600', color: '#475569', marginBottom: '6px', fontSize: '14px' }}>Changer le short publicitaire ou la vidéo (.mp4)</label>
-            <input type="file" accept="video/mp4" disabled={loading} onChange={(e) => handleFileUpload(e, 'video')} style={{ fontSize: '14px' }} />
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>
+              <thead>
+                <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
+                  <th style={{ padding: '12px', color: '#64748b' }}>Numéro Mobile</th>
+                  <th style={{ padding: '12px', color: '#64748b' }}>Sponsor Étape</th>
+                  <th style={{ padding: '12px', color: '#64748b' }}>Ticket Choisi</th>
+                  <th style={{ padding: '12px', color: '#64748b' }}>Date / Heure</th>
+                </tr>
+              </thead>
+              <tbody>
+                {participations.length > 0 ? (
+                  participations.map((p) => (
+                    <tr key={p.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                      <td style={{ padding: '12px', fontWeight: 'bold', color: '#1e293b' }}>{p.phone_number}</td>
+                      <td style={{ padding: '12px' }}>Étape {p.sponsor_id}</td>
+                      <td style={{ padding: '12px' }}>🎫 Ticket {p.ticket_choisi}</td>
+                      <td style={{ padding: '12px', color: '#64748b', fontSize: '12px' }}>{new Date(p.date_participation).toLocaleString('fr-FR')}</td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} style={{ padding: '20px', textAlign: 'center', color: '#94a3b8' }}>Aucune participation enregistrée pour le moment.</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
 
