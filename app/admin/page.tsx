@@ -161,19 +161,16 @@ export default function AdminDashboard() {
     }
   };
 
-  // FONCTION DU TIRAGE AU SORT ALÉATOIRE
   const handleLancerTirage = () => {
     if (participations.length === 0) {
       alert("Aucune participation enregistrée pour le moment. Impossible de faire un tirage.");
       return;
     }
-    // Sélectionner une ligne au hasard dans le tableau des participations locales
     const randomIndex = Math.floor(Math.random() * participations.length);
     const selection = participations[randomIndex];
     setGagnantTire(selection);
   };
 
-  // ENREGISTRER LE GAGNANT SÉLECTIONNÉ
   const handleValiderGagnant = async () => {
     if (!gagnantTire) return;
 
@@ -195,7 +192,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // PURGE COMPLÈTE DE FIN DE SEMAINE (SÉCURITÉ ANTI-SATURATION)
   const handlePurgeHebdomadaire = async () => {
     const confirmation = window.confirm(
       "⚠️ ATTENTION !\n\nCette action va SUPPRIMER DEFINITIVEMENT toutes les participations de la base de données pour démarrer la nouvelle semaine.\n\nAssurez-vous d'avoir bien effectué vos 6 tirages de la semaine avant de valider. Continuer ?"
@@ -203,11 +199,10 @@ export default function AdminDashboard() {
 
     if (!confirmation) return;
 
-    // Supprimer toutes les lignes de la table participations
     const { error } = await supabase
       .from('participations')
       .delete()
-      .neq('phone_number', '0000'); // Astuce SQL pour cibler toutes les lignes
+      .neq('phone_number', '0000');
 
     if (error) {
       alert(`Erreur lors du nettoyage : ${error.message}`);
@@ -217,7 +212,6 @@ export default function AdminDashboard() {
     }
   };
 
-  // ENREGISTRER UN TÉMOIGNAGE
   const handleAddTemoignage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!nomGagnant || !montant) return;
@@ -262,7 +256,6 @@ export default function AdminDashboard() {
             <h1 style={{ margin: 0, fontSize: '28px', color: '#1e3a8a' }}>🛠️ Panneau Général KADO 237</h1>
             <p style={{ margin: '4px 0 0 0', color: '#64748b' }}>Gestion durable, tirages et rotation de la plateforme.</p>
           </div>
-          {/* BOUTON DE PURGE HEBDOMADAIRE */}
           <button onClick={handlePurgeHebdomadaire} style={{ padding: '12px 20px', backgroundColor: '#dc2626', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', boxShadow: '0 4px 6px rgba(220, 38, 38, 0.2)' }}>
             🧹 Purge & Remise à Zéro (Fin de Semaine)
           </button>
@@ -270,7 +263,6 @@ export default function AdminDashboard() {
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '30px' }}>
           
-          {/* SECTION CONTROLE DES TIRAGES (HAUT DE PAGE) */}
           <section style={{ backgroundColor: '#eff6ff', padding: '24px', borderRadius: '12px', border: '2px solid #bfdbfe' }}>
             <h2 style={{ margin: '0 0 10px 0', fontSize: '22px', color: '#1e40af' }}>🎲 Module de Tirage au Sort</h2>
             <p style={{ color: '#475569', marginTop: 0, marginBottom: '20px' }}>Sélectionnez un jour de la semaine pour attribuer son kado.</p>
@@ -293,9 +285,8 @@ export default function AdminDashboard() {
               </div>
             </div>
 
-            {/* RÉSULTAT DU TIRAGE FLASH */}
             {gagnantTire && (
-              <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px', border: '2px dashed #2563eb', textAlign: 'center', animation: 'fadeIn 0.3s ease', marginBottom: '20px' }}>
+              <div style={{ backgroundColor: '#fff', padding: '20px', borderRadius: '8px', border: '2px dashed #2563eb', textAlign: 'center', marginBottom: '20px' }}>
                 <h3 style={{ margin: '0 0 8px 0', color: '#16a34a' }}>🎉 NUMÉRO SÉLECTIONNÉ !</h3>
                 <p style={{ fontSize: '28px', fontWeight: 'bold', color: '#1e293b', margin: '10px 0' }}>{gagnantTire.phone_number}</p>
                 <p style={{ color: '#64748b', margin: 0 }}>Ticket choisi : 🎫 T-{gagnantTire.ticket_choisi} | Étape franchie lors du tirage : Sponsor {gagnantTire.sponsor_id}</p>
@@ -311,7 +302,6 @@ export default function AdminDashboard() {
               </div>
             )}
 
-            {/* AFFICHAGE DES 6 GAGNANTS DE LA SEMAINE */}
             <h4 style={{ margin: '20px 0 10px 0', color: '#1e40af' }}>🏆 Derniers gagnants officiels enregistrés :</h4>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '10px' }}>
               {gagnantsSemaine.slice(0, 6).map((g, idx) => (
@@ -324,7 +314,6 @@ export default function AdminDashboard() {
             </div>
           </section>
 
-          {/* AJOUT DE TÉMOIGNAGES (PHOTOS/VIDÉOS EN TOUTE LÉGÈRETÉ) */}
           <section style={{ backgroundColor: '#fff', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
             <h2 style={{ margin: '0 0 10px 0', fontSize: '20px', color: '#1e3a8a' }}>📸 Publier un Témoignage Reçu (Max 100)</h2>
             <p style={{ color: '#64748b', marginTop: 0, marginBottom: '20px', fontSize: '14px' }}>Permet aux visiteurs de voir les preuves en images. Les plus anciens s'effacent automatiquement au-delà de 100.</p>
@@ -342,7 +331,7 @@ export default function AdminDashboard() {
                 <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '4px' }}>Photo ou Vidéo du Gagnant :</label>
                 <input type="file" accept="image/*,video/*" onChange={(e) => handleFileUpload(e, 'temoignage')} style={{ marginBottom: '6px' }} />
                 {uploadingTemoignage && <div style={{ fontSize: '13px', color: '#2563eb' }}>Téléchargement du média de preuve...</div>}
-                <input type="text" value={mediaUrl} onChange={(e) => setMediaUrl(e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', mt: 1 }} placeholder="URL du fichier chargé" />
+                <input type="text" value={mediaUrl} onChange={(e) => setMediaUrl(e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', marginTop: '4px' }} placeholder="URL du fichier chargé" />
               </div>
               <div style={{ gridColumn: 'span 2' }}>
                 <label style={{ display: 'block', fontWeight: '500', marginBottom: '4px' }}>Commentaire ou Slogan :</label>
@@ -354,7 +343,6 @@ export default function AdminDashboard() {
             </form>
           </section>
 
-          {/* CONFIGURATION DES SPONSORS (ANCIEN MODULE COMBINÉ) */}
           <section style={{ backgroundColor: '#fff', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
             <h2 style={{ margin: '0 0 20px 0', fontSize: '20px', color: '#1e3a8a' }}>💼 Configuration Individuelle des 5 Sponsors</h2>
             
@@ -424,7 +412,6 @@ export default function AdminDashboard() {
             </form>
           </section>
 
-          {/* TABLEAU DES ENTRÉES BRUTES DE LA SEMAINE (POUR VÉRIFICATION) */}
           <section style={{ backgroundColor: '#fff', padding: '24px', borderRadius: '12px', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
               <h2 style={{ margin: 0, fontSize: '18px', color: '#1e3a8a' }}>📊 Flux des participations en cours ({participations.length} entrées cette semaine)</h2>
