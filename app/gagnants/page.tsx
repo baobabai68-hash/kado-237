@@ -140,7 +140,7 @@ export default function GagnantsEtTemoignages() {
                         <span style={{ fontSize: '12px', color: '#64748b' }}>{t.ville || 'Cameroun'}</span>
                       </div>
                       {t.commentaire && (
-                        <p style={{ margin: '0 0 12px 0', fontSize: '13px', color: '#94a3b8', fontStyle: 'italic', lineHeigh: '1.4' }}>
+                        <p style={{ margin: '0 0 12px 0', fontSize: '13px', color: '#94a3b8', fontStyle: 'italic', lineHeight: '1.4' }}>
                           "{t.commentaire}"
                         </p>
                       )}
