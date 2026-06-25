@@ -116,7 +116,7 @@ export default function GagnantsEtTemoignages() {
           
           {temoignages.length === 0 ? (
             <div style={{ backgroundColor: '#1e293b', borderRadius: '12px', padding: '30px', textAlign: 'center', border: '1px solid #334155', color: '#94a3b8' }}>
-              <p style={{ margin: 0 }}>Les premières photos et captures de paiements Mobile Money des gagnants seront affichées ici très bientôt.</p>
+              <p style={{ margin: 0 }}>Les premières photos et vidéos de remises officielles des lots physiques aux gagnants seront affichées ici très bientôt.</p>
             </div>
           ) : (
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '20px' }}>
@@ -146,7 +146,7 @@ export default function GagnantsEtTemoignages() {
                       )}
                     </div>
                     <div style={{ backgroundColor: 'rgba(74, 222, 128, 0.1)', padding: '8px 12px', borderRadius: '6px', border: '1px dashed #4ade80', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '12px', color: '#4ade80', fontWeight: 'bold' }}>Reçu avec succès</span>
+                      <span style={{ fontSize: '12px', color: '#4ade80', fontWeight: 'bold' }}>Lot Remis</span>
                       <span style={{ fontSize: '14px', color: '#fff', fontWeight: 'bold' }}>{t.montant_gagne}</span>
                     </div>
                   </div>
