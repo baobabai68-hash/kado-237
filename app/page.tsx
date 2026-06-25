@@ -115,7 +115,7 @@ export default function HomePage() {
 
         {/* 1. ÉCRAN FLUIDE : LECTEUR VIDÉO DE PUBLICITÉ FORCÉE */}
         {enLectureVideo && (
-          <div style={{ fixed: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#000000', zIndex: 999, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '20px', minHeight: '90vh', borderRadius: '16px', border: '2px solid #facc15' }}>
+          <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: '#000000', zIndex: 999, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '20px', minHeight: '90vh', borderRadius: '16px', border: '2px solid #facc15' }}>
             <div style={{ width: '100%', textAlign: 'center', marginBottom: '20px' }}>
               <span style={{ backgroundColor: '#dc2626', color: '#fff', padding: '6px 14px', borderRadius: '20px', fontSize: '12px', fontWeight: 'bold' }}>
                 PUBLICITÉ OBLIGATOIRE ({compteALebours}s)
